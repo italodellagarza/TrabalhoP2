@@ -6,9 +6,9 @@ import org.apache.spark.api.java.JavaRDD;
 public class Main {
 
 	public static void main(String[] args) {
-		SparkConf sc = new SparkConf().setAppName("Teste");
+		SparkConf sc = new SparkConf().setMaster("local").setAppName("Teste");
 		JavaSparkContext ctx = new JavaSparkContext(sc);
-		String logFile = "/home/italo/spark-2.2.0-bin-hadoop2.7/README.md"; // Should be some file on your system
+		String logFile = "/home/douglas/spark-2.2.0-bin-hadoop2.7/README.md"; // Should be some file on your system
 	    JavaRDD<String> logData = ctx.textFile(logFile);
 
 	    long numAs = logData.filter(s -> s.contains("a")).count();
