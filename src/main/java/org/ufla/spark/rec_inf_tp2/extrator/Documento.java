@@ -1,7 +1,7 @@
 package org.ufla.spark.rec_inf_tp2.extrator;
 
 public class Documento {
-	
+		
 	private double idClasse;
 	private String split;
     private String topico;
