@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ufla.spark.rec_inf_tp2.extrator.Documento;
+
 /**
  * Classe responsável por implementar métodos genéricos para extrair dados de um
  * arquivo.
@@ -22,76 +23,74 @@ public class ExtratorDocumentos {
 	 * Path de consultas que está sendo processado.
 	 */
 	private static File dir;
-	
+
 	/**
 	 * Leitor do arquivo atual.
 	 */
 	private static BufferedReader br;
-	
+
 	/**
 	 * Última linha que foi lida do arquivo atual.
 	 */
 	private static String linhaAtual;
-	
+
 	/**
-	 * Caractere especial que está contido em alguns arquivos da base de dados
-	 * para marcar a sua última linha.
+	 * Caractere especial que está contido em alguns arquivos da base de dados para
+	 * marcar a sua última linha.
 	 */
 	private static final char FINAL = '';
-	
+
 	/**
-	 * Lista de documentos para Treino 
+	 * Lista de documentos para Treino
 	 */
 	private static List<Documento> documentosTraining = new ArrayList<>();
-	
+
 	/**
-	 * Lista de documentos para Teste 
+	 * Lista de documentos para Teste
 	 */
 	private static List<Documento> documentosTest = new ArrayList<>();
-	
+
 	public static void extrator() {
 		dir = new File("Reuters21578-Apte-90Cat");
 		File[] split = dir.listFiles();
 		double idClasse;
-		
-		for(File spl: split) {
-			if(spl.getName().toLowerCase().equals("training")) {
+
+		for (File spl : split) {
+			if (spl.getName().toLowerCase().equals("training")) {
 				idClasse = 0.0;
 				File[] topicos = spl.listFiles();
-				for(File top: topicos) {
+				for (File top : topicos) {
 					idClasse++;
 					File[] arquivos = top.listFiles();
-					for(File arquivo: arquivos) {
+					for (File arquivo : arquivos) {
 						setArquivo(arquivo);
-						Documento doc = new Documento(idClasse,spl.getName().toLowerCase(),
-														top.getName().toLowerCase(),
-														leLinhas().toString().toLowerCase());
+						Documento doc = new Documento(idClasse, spl.getName().toLowerCase(),
+								top.getName().toLowerCase(), leLinhas().toString().toLowerCase());
 						documentosTraining.add(doc);
 					}
 				}
-			}else {
+			} else {
 				idClasse = 0.0;
 				File[] topicos = spl.listFiles();
-				for(File top: topicos) {
+				for (File top : topicos) {
 					File[] arquivos = top.listFiles();
 					idClasse++;
-					for(File arquivo: arquivos) {
+					for (File arquivo : arquivos) {
 						setArquivo(arquivo);
 						Documento doc = new Documento(idClasse, spl.getName().toLowerCase(),
-														top.getName().toLowerCase(),
-														leLinhas().toString().toLowerCase());
+								top.getName().toLowerCase(), leLinhas().toString().toLowerCase());
 						documentosTest.add(doc);
 					}
 				}
 			}
 		}
 	}
-		
+
 	public static boolean setArquivo(File arquivo) {
 		if (arquivo == null) {
 			return false;
 		}
-		
+
 		try {
 			br = new BufferedReader(new FileReader(arquivo));
 		} catch (Exception e) {
@@ -101,32 +100,32 @@ public class ExtratorDocumentos {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Lê uma linha do arquivo atual e salva na variável de instância
-	 * linhaAtual. Esse método trata a exceção de leitura apenas imprimindo sua
-	 * pilha de execução e a relançando como exceção de runtime (não
-	 * verificada). Este processo é realizado, pois os arquivos são controlados
-	 * e acredita que não será lançada exceção.
+	 * Lê uma linha do arquivo atual e salva na variável de instância linhaAtual.
+	 * Esse método trata a exceção de leitura apenas imprimindo sua pilha de
+	 * execução e a relançando como exceção de runtime (não verificada). Este
+	 * processo é realizado, pois os arquivos são controlados e acredita que não
+	 * será lançada exceção.
 	 */
 	public static StringBuilder leLinhas() {
 		try {
 			linhaAtual = br.readLine();
-			//numLinhaAtual++;
+			// numLinhaAtual++;
 			StringBuilder valor = new StringBuilder();
-			
-			if(linhaAtual != null && !linhaAtual.trim().isEmpty()){	
+
+			if (linhaAtual != null && !linhaAtual.trim().isEmpty()) {
 				valor = new StringBuilder(linhaAtual.trim());
 			}
-			
-			while(!isFinalDeArquivo()) {
+
+			while (!isFinalDeArquivo()) {
 				linhaAtual = br.readLine();
-				//numLinhaAtual++;
-				if(linhaAtual != null && !linhaAtual.trim().isEmpty()){
+				// numLinhaAtual++;
+				if (linhaAtual != null && !linhaAtual.trim().isEmpty()) {
 					valor.append(" ").append(linhaAtual.trim());
 				}
 			}
-			//numLinhaAtual=0;
+			// numLinhaAtual=0;
 			fechaLeitor();
 			return valor.replace(0, 1, "");
 		} catch (Exception e) {
@@ -134,7 +133,7 @@ public class ExtratorDocumentos {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Verifica se a leitura do arquivo chegou ao fim dele.
 	 * 
@@ -153,7 +152,7 @@ public class ExtratorDocumentos {
 		}
 		return linhaAtual == null;
 	}
-	
+
 	/**
 	 * Fecha o leitor que está sendo utilizado para ler o arquivo.
 	 */
@@ -165,12 +164,12 @@ public class ExtratorDocumentos {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 	public static List<Documento> getDocumentosTraining() {
 		return documentosTraining;
 	}
-	
+
 	public static List<Documento> getDocumentosTest() {
 		return documentosTest;
-	}	
+	}
 }
