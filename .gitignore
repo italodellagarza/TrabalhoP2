@@ -1,6 +1,5 @@
 /target/
-/Reuters21578-Apte-90Cat/test_json_hdfs
-/Reuters21578-Apte-90Cat/test_json_hdfs_precproc_completo
-/Reuters21578-Apte-90Cat/training_json_hdfs
-/Reuters21578-Apte-90Cat/training_json_hdfs_precproc_completo
+/Reuters21578-Apte-90Cat/test_*
+/Reuters21578-Apte-90Cat/training_*
 modelo*
+predicoes
