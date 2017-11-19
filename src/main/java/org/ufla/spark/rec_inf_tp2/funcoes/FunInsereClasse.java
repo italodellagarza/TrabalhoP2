@@ -21,9 +21,9 @@ public class FunInsereClasse implements Function<Tuple2<String, String>, Row> {
 	 * Classe do documento.
 	 */
 	private String classe;
-	private Integer codigoClasse;
+	private Double codigoClasse;
 
-	public FunInsereClasse(String classe, int codigoClasse) {
+	public FunInsereClasse(String classe, double codigoClasse) {
 		this.classe = classe;
 		this.codigoClasse = codigoClasse;
 	}

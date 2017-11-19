@@ -9,7 +9,7 @@ package org.ufla.spark.rec_inf_tp2;
  *         Enumeração dos tipos de extração de features que podem ser realizados
  *         nos dados.
  */
-public enum ExtracaoDeFeatures {
+public enum ExtracaoFeatures {
 
 	/**
 	 * Sem tokenizar texto e extrair features.
@@ -34,7 +34,7 @@ public enum ExtracaoDeFeatures {
 	 */
 	private int qtdFeatures;
 
-	private ExtracaoDeFeatures(String sufixoDiretorioBD, int qtdFeatures) {
+	private ExtracaoFeatures(String sufixoDiretorioBD, int qtdFeatures) {
 		this.sufixoDiretorioBD = sufixoDiretorioBD;
 		this.qtdFeatures = qtdFeatures;
 	}

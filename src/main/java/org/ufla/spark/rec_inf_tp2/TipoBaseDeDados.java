@@ -23,11 +23,11 @@ enum TipoBaseDeDados {
 	/**
 	 * Base de dados de treino em json salva em HDFS.
 	 */
-	TREINO_JSON_HDFS("training_json_hdfs"),
+	TREINO_HDFS("training_hdfs"),
 	/**
 	 * Base de dados de teste em json salva em HDFS.
 	 */
-	TESTE_JSON_HDFS("test_json_hdfs");
+	TESTE_HDFS("test_hdfs");
 
 	/**
 	 * Nome do diretório onde este tipo da base de dados Reuters 21578 está salvo.
@@ -75,9 +75,9 @@ enum TipoBaseDeDados {
 	public TipoBaseDeDados paraJsonHDFS() {
 		switch (this) {
 		case TREINO:
-			return TREINO_JSON_HDFS;
+			return TREINO_HDFS;
 		case TESTE:
-			return TESTE_JSON_HDFS;
+			return TESTE_HDFS;
 		default:
 			return this;
 		}
@@ -91,9 +91,9 @@ enum TipoBaseDeDados {
 	 */
 	public TipoBaseDeDados paraOriginal() {
 		switch (this) {
-		case TREINO_JSON_HDFS:
+		case TREINO_HDFS:
 			return TREINO;
-		case TESTE_JSON_HDFS:
+		case TESTE_HDFS:
 			return TESTE;
 		default:
 			return this;

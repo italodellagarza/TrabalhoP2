@@ -105,7 +105,7 @@ public class Configuracao {
 	 * @return diretório da base de dados especificada
 	 */
 	public File diretorioBD(TipoBaseDeDados tipoBaseDeDados, PreProcessamento preProcessamento,
-			ExtracaoDeFeatures extracaoDeFeatures) {
+			ExtracaoFeatures extracaoDeFeatures) {
 		return new File(reutersBD.getAbsolutePath() + File.separator + tipoBaseDeDados.getNomeDiretorioBD()
 				+ preProcessamento.getSufixoDiretorioBD() + extracaoDeFeatures.getSufixoDiretorioBD());
 	}

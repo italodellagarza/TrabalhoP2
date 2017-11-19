@@ -3,6 +3,7 @@ package org.ufla.spark.rec_inf_tp2;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.spark.api.java.JavaPairRDD;
@@ -58,11 +59,11 @@ public class BaseDeDados {
 	/**
 	 * Mapeamento de uma classe para seu código.
 	 */
-	private Map<String, Integer> classesToCodigo = new HashMap<>();
+	private Map<String, Double> classesToCodigo = new HashMap<>();
 	/**
 	 * Contador de classes da base de dados.
 	 */
-	private int contClasses = 0;
+	private double contClasses = 0;
 
 	/**
 	 * Construtor da base de dados.
@@ -89,15 +90,15 @@ public class BaseDeDados {
 	 * 
 	 * @param dataset
 	 *            base de dados em que a extração de features será realizada
-	 * @param extracaoDeFeatures
+	 * @param extracaoFeatures
 	 *            extração de features a ser realizada
 	 * @return base de dados após aplica a extração de features
 	 */
-	private Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoDeFeatures extracaoDeFeatures) {
+	private Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoFeatures extracaoFeatures) {
 		Tokenizer tokenizer = new Tokenizer().setInputCol(CONTEUDO_FINAL_PRE_PROC_COL).setOutputCol(PALAVRAS_COL);
 		Pipeline pipeline = null;
-		int qtdFeatures = extracaoDeFeatures.getQtdFeatures();
-		switch (extracaoDeFeatures) {
+		int qtdFeatures = extracaoFeatures.getQtdFeatures();
+		switch (extracaoFeatures) {
 		case HASHING_TF:
 			HashingTF hashingTF = new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(FEATURES_COL);
 			if (qtdFeatures > 0) {
@@ -121,6 +122,36 @@ public class BaseDeDados {
 	}
 
 	/**
+	 * Cria um array com as transformações de uma determinada extração de features.
+	 * 
+	 * @param extracaoFeatures
+	 *            extracaoFeatures a ser utilizada para extrair as features
+	 * @return lista com as transformações necessárias para realizar a extração de
+	 *         features.
+	 */
+	public List<PipelineStage> criarExtracaoFeatures(ExtracaoFeatures extracaoFeatures) {
+		List<PipelineStage> extracaoFeaturesTransf = new ArrayList<>();
+		Tokenizer tokenizer = new Tokenizer().setInputCol(CONTEUDO_FINAL_PRE_PROC_COL).setOutputCol(PALAVRAS_COL);
+		extracaoFeaturesTransf.add(tokenizer);
+		switch (extracaoFeatures) {
+		case HASHING_TF:
+			HashingTF hashingTF = new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(FEATURES_COL);
+			extracaoFeaturesTransf.add(hashingTF);
+			break;
+		case HASHING_TF_IDF:
+			HashingTF hashingTF2 =
+					new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(CARACTERISTICAS_TF_COL);
+			IDF idf = new IDF().setInputCol(hashingTF2.getOutputCol()).setOutputCol(FEATURES_COL);
+			extracaoFeaturesTransf.add(hashingTF2);
+			extracaoFeaturesTransf.add(idf);
+			break;
+		default:
+			throw new RuntimeException("Tipo de extração de features não reconhecido.");
+		}
+		return extracaoFeaturesTransf;
+	}
+
+	/**
 	 * Realiza a leitura de um determinado tipo de base de dados com um determinado
 	 * tipo de pré-processamento.
 	 * 
@@ -132,9 +163,9 @@ public class BaseDeDados {
 	 *         selecionado
 	 */
 	public Dataset<Row> leBaseDeDados(TipoBaseDeDados tipoBaseDeDados, PreProcessamento preProcessamento,
-			ExtracaoDeFeatures extracaoDeFeatures) {
+			ExtracaoFeatures extracaoDeFeatures) {
 		if (tipoBaseDeDados.eOriginal() && (!PreProcessamento.NENHUM.equals(preProcessamento)
-				|| !ExtracaoDeFeatures.SEM_SELECAO.equals(extracaoDeFeatures))) {
+				|| !ExtracaoFeatures.SEM_SELECAO.equals(extracaoDeFeatures))) {
 			tipoBaseDeDados = tipoBaseDeDados.paraJsonHDFS();
 		}
 		Configuracao configuracao = Configuracao.getInstancia();
@@ -146,42 +177,42 @@ public class BaseDeDados {
 			if (tipoBaseDeDados.eOriginal()) {
 				return lerBaseDeDadosOriginal(diretorio);
 			} else {
-				return configuracao.getSessaoSpark().read().json(diretorio.getAbsolutePath());
+				return configuracao.getSessaoSpark().read().load(diretorio.getAbsolutePath());
 			}
 		}
 		System.out.printf("\nBase de dados %s com o pré-processamento %s não está salva no diretório %s.\n",
 				tipoBaseDeDados, preProcessamento, diretorio.getAbsolutePath());
-		if (!ExtracaoDeFeatures.SEM_SELECAO.equals(extracaoDeFeatures)) {
-			Dataset<Row> dataset = leBaseDeDados(tipoBaseDeDados, preProcessamento, ExtracaoDeFeatures.SEM_SELECAO);
+		if (!ExtracaoFeatures.SEM_SELECAO.equals(extracaoDeFeatures)) {
+			Dataset<Row> dataset = leBaseDeDados(tipoBaseDeDados, preProcessamento, ExtracaoFeatures.SEM_SELECAO);
 			System.out.printf("Aplicando a extração de feature %s na base de dados %s\n", extracaoDeFeatures,
 					tipoBaseDeDados);
 			return aplicarExtracaoDeFeatures(dataset, extracaoDeFeatures);
 		}
 		if (!PreProcessamento.NENHUM.equals(preProcessamento)) {
 			File diretorioSemFeatures =
-					configuracao.diretorioBD(tipoBaseDeDados, preProcessamento, ExtracaoDeFeatures.SEM_SELECAO);
+					configuracao.diretorioBD(tipoBaseDeDados, preProcessamento, ExtracaoFeatures.SEM_SELECAO);
 			Dataset<Row> dataset =
-					leBaseDeDados(tipoBaseDeDados, PreProcessamento.NENHUM, ExtracaoDeFeatures.SEM_SELECAO);
+					leBaseDeDados(tipoBaseDeDados, PreProcessamento.NENHUM, ExtracaoFeatures.SEM_SELECAO);
 			System.out.printf("Aplicando o pré-processamento %s na base de dados %s\n", preProcessamento,
 					tipoBaseDeDados);
 			dataset = aplicarPreProcessamento(dataset, preProcessamento);
 			System.out.printf("Salvando base de dados %s com o pré-processamento %s no diretório %s.\n",
 					tipoBaseDeDados, preProcessamento, diretorioSemFeatures.getAbsolutePath());
 			dataset = dataset.select(NOME_COL, CONTEUDO_FINAL_PRE_PROC_COL, LABEL_COL, LABEL_STR_COL);
-			dataset.write().json(diretorioSemFeatures.getAbsolutePath());
+			dataset.write().save(diretorioSemFeatures.getAbsolutePath());
 			return dataset;
 		}
 		if (!tipoBaseDeDados.eOriginal()) {
 			TipoBaseDeDados baseDeDadosOriginal = tipoBaseDeDados.paraOriginal();
 			File diretorioOriginal =
-					configuracao.diretorioBD(baseDeDadosOriginal, preProcessamento, ExtracaoDeFeatures.SEM_SELECAO);
+					configuracao.diretorioBD(baseDeDadosOriginal, preProcessamento, ExtracaoFeatures.SEM_SELECAO);
 			System.out.printf("\nLendo base de dados %s com o pré-processamento %s do diretório %s.\n",
 					baseDeDadosOriginal, preProcessamento, diretorioOriginal.getAbsolutePath());
 			Dataset<Row> datasetOriginal =
-					leBaseDeDados(baseDeDadosOriginal, preProcessamento, ExtracaoDeFeatures.SEM_SELECAO);
+					leBaseDeDados(baseDeDadosOriginal, preProcessamento, ExtracaoFeatures.SEM_SELECAO);
 			System.out.printf("Salvando base de dados %s com o pré-processamento %s no diretório %s.\n",
 					tipoBaseDeDados, preProcessamento, diretorioOriginal.getAbsolutePath());
-			datasetOriginal.write().json(diretorio.getAbsolutePath());
+			datasetOriginal.write().save(diretorio.getAbsolutePath());
 			return datasetOriginal;
 		}
 		System.out.printf("\nNão foi possível ler a base de dados %s com o pré-processamento %s no diretório %s.\n",
@@ -202,7 +233,7 @@ public class BaseDeDados {
 		Dataset<Row> dataset = configuracao.getSessaoSpark().createDataFrame(new ArrayList<Row>(), esquema);
 		for (File diretorioTema : diretorio.listFiles()) {
 			String classe = diretorioTema.getName();
-			int codigoClasse = classesToCodigo.getOrDefault(classe, -1);
+			double codigoClasse = classesToCodigo.getOrDefault(classe, -1.0);
 			if (codigoClasse == -1) {
 				codigoClasse = contClasses;
 				classesToCodigo.put(classe, contClasses);
@@ -231,7 +262,7 @@ public class BaseDeDados {
 			campos[i] = DataTypes.createStructField(ESQUEMA_STRING[i], DataTypes.StringType, true);
 		}
 		campos[ESQUEMA_STRING.length - 1] =
-				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.IntegerType, true);
+				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.DoubleType, true);
 		return DataTypes.createStructType(campos);
 	}
 
@@ -245,7 +276,7 @@ public class BaseDeDados {
 	 * @return dataset após a aplicação do pré-processamento
 	 */
 	public Dataset<Row> aplicarPreProcessamento(Dataset<Row> dataset, PreProcessamento preProcessamento) {
-		Transformer[] preProcessamentos = criarPreProcessamentosTransformacaoGenerica(preProcessamento);
+		Transformer[] preProcessamentos = criarPreProcessamentos(preProcessamento);
 		Pipeline pipeline = new Pipeline().setStages(preProcessamentos);
 		return pipeline.fit(dataset).transform(dataset);
 	}
@@ -257,7 +288,7 @@ public class BaseDeDados {
 	 *            pré-processamento a ser extraído as transformações
 	 * @return array com as transformações de pré-processamento
 	 */
-	private Transformer[] criarPreProcessamentosTransformacaoGenerica(PreProcessamento preProcessamento) {
+	private Transformer[] criarPreProcessamentos(PreProcessamento preProcessamento) {
 		@SuppressWarnings("rawtypes")
 		Class<? extends TransformacaoGenerica>[] classesTransformacao = preProcessamento.getClassesTransformacao();
 		String[] colunasEntrada = preProcessamento.getColunasEntrada();
