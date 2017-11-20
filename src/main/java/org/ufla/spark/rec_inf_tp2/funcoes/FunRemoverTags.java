@@ -3,6 +3,14 @@ import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
+/**
+ * Responsável por transformar a string de uma coluna de uma Row em uma nova
+ * string sem tags.
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class FunRemoverTags implements MapFunction<Row, Row> {
 
 	private static final long serialVersionUID = 1L;
@@ -11,6 +19,9 @@ public class FunRemoverTags implements MapFunction<Row, Row> {
 	 * Coluna em que deve aplicar o pré-processamento.
 	 */
 	private int colunaEntrada;
+	/**
+	 * Coluna em que deve salvar string após o pré-processamento.
+	 */
 	private int colunaSaida;
 
 	public FunRemoverTags(int colunaEntrada, int colunaSaida) {
@@ -18,6 +29,10 @@ public class FunRemoverTags implements MapFunction<Row, Row> {
 		this.colunaSaida = colunaSaida;
 	}
 
+	/**
+	 * Transforma a string de uma coluna de uma Row (colunaEntrada) em uma nova
+	 * string sem tags (colunaSaida).
+	 */
 	@Override
 	public Row call(Row row) throws Exception {
 		int n = row.length();

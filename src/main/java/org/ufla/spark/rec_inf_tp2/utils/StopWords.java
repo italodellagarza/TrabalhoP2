@@ -9,11 +9,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Responsável por ler as stopwords do arquivo stoplist.txt.
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class StopWords {
 
+	/**
+	 * Arquivo com as stopwords
+	 */
 	private static String ARQUIVO_STOP_WORDS = "stoplist.txt";
+	/**
+	 * Leitor bufferizado para o arquivo.
+	 */
 	private BufferedReader in;
 
+	/**
+	 * Recupera um array com as stopwords.
+	 * 
+	 * @return array com as stopwords
+	 * @throws IOException
+	 */
 	public String[] getStopWords() throws IOException {
 		List<String> stopWords = new ArrayList<>();
 		FileReader file = new FileReader(ARQUIVO_STOP_WORDS);
@@ -32,6 +51,12 @@ public class StopWords {
 		return stopWords.toArray(new String[0]);
 	}
 
+	/**
+	 * Recupera um conjunto com as stopwords.
+	 * 
+	 * @return conjunto com as stopwords.
+	 * @throws IOException
+	 */
 	public Set<String> getSetStopWords() throws IOException {
 		return new HashSet<>(Arrays.asList(getStopWords()));
 	}

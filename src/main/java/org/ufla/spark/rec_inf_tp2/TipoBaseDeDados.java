@@ -1,12 +1,11 @@
 package org.ufla.spark.rec_inf_tp2;
 
 /**
+ * Enumeração dos tipos de base de dados Reuters 21578 que utilizamos.
  * 
  * @author carlos
  * @author douglas
  * @author italo
- * 
- *         Enumeração dos tipos de base de dados Reuters 21578 que utilizamos.
  */
 enum TipoBaseDeDados {
 

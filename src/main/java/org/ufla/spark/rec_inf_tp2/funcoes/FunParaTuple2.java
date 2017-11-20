@@ -4,14 +4,25 @@ import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Row;
 import scala.Tuple2;
 
+/**
+ * Responsável por converter uma Row em uma tupla com a predição da classe e a
+ * classe documento.
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class FunParaTuple2 implements MapFunction<Row, Tuple2<Object, Object>> {
 
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Classe do documento.
+	 * Indice da coluna onde está a predição do classe do documento.
 	 */
 	private int colunaPredicao;
+	/**
+	 * Indice da coluna onde está a classe do documento.
+	 */
 	private int colunaLabel;
 
 	public FunParaTuple2(int colunaPredicao, int colunaLabel) {
@@ -20,7 +31,7 @@ public class FunParaTuple2 implements MapFunction<Row, Tuple2<Object, Object>> {
 	}
 
 	/**
-	 * Retorna a linha com a inserção da classe do objeto.
+	 * Converte a Row em uma tupla com a predição da classe e a classe documento.
 	 */
 	@Override
 	public Tuple2<Object, Object> call(Row row) throws Exception {

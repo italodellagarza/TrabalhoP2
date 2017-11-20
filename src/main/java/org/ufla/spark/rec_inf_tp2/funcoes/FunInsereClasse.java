@@ -7,11 +7,13 @@ import org.apache.spark.sql.RowFactory;
 import scala.Tuple2;
 
 /**
+ * Responsável por realizar a conversão de um documento que está em uma tupla
+ * (nome, conteúdo) em uma linha (Row) com a inserção da classe (nome e código)
+ * do documento.
  * 
  * @author carlos
- * 
- *         Responsável por realizar a inserção da classe de um documento em sua
- *         linha (Row).
+ * @author douglas
+ * @author italo
  */
 public class FunInsereClasse implements Function<Tuple2<String, String>, Row> {
 
@@ -21,15 +23,19 @@ public class FunInsereClasse implements Function<Tuple2<String, String>, Row> {
 	 * Classe do documento.
 	 */
 	private String classe;
-	private Double codigoClasse;
+	/**
+	 * Código da classe do documento.
+	 */
+	private Integer codigoClasse;
 
-	public FunInsereClasse(String classe, double codigoClasse) {
+	public FunInsereClasse(String classe, int codigoClasse) {
 		this.classe = classe;
 		this.codigoClasse = codigoClasse;
 	}
 
 	/**
-	 * Retorna a linha com a inserção da classe do objeto.
+	 * Aplica a conversão na tupla e retorna a linha (Row) com o nome, conteúdo,
+	 * classe e código da classe do documento.
 	 */
 	@Override
 	public Row call(Tuple2<String, String> tuple2) throws Exception {

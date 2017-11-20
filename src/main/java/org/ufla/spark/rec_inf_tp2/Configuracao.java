@@ -7,13 +7,12 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
 /**
+ * Responsável por manter as configurações da base de dados Reuters 21578 e da
+ * aplicação Spark. Utiliza padrão Singleton. *
  * 
  * @author carlos
  * @author douglas
  * @author italo
- *
- *         Responsável por manter as configurações da base de dados Reuters
- *         21578 e da aplicação Spark. Utiliza padrão Singleton.
  */
 public class Configuracao {
 

@@ -11,25 +11,20 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
-import org.apache.spark.ml.feature.HashingTF;
-import org.apache.spark.ml.feature.IDF;
-import org.apache.spark.ml.feature.Tokenizer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.ufla.spark.rec_inf_tp2.funcoes.FunInsereClasse;
-import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoGenerica;
+import org.ufla.spark.rec_inf_tp2.utils.DatasetUtils;
 
 /**
+ * Responsável pelas operações de leitura da base de dados. Padrão singleton.
  * 
  * @author carlos
  * @author douglas
  * @author italo
- * 
- *         Responsável pelas operações de leitura da base de dados. Padrão
- *         singleton.
  */
 public class BaseDeDados {
 
@@ -55,15 +50,22 @@ public class BaseDeDados {
 	public static final String PALAVRAS_COL = "palavras";
 	public static final String CARACTERISTICAS_TF_COL = "caracteristicas_TF";
 	public static final String FEATURES_COL = "features";
+	/**
+	 * Localização relativa (em relação a localização da base de dados Reuters
+	 * 21578) do documento utilizado como exemplo para demonstrar o
+	 * pré-processamento utilizado.
+	 */
+	private static final String DOCUMENTO_EXEMPLO_PRE_PROCESSAMENTO =
+			File.separator + "training" + File.separator + "acq" + File.separator + "0000005";
 
 	/**
 	 * Mapeamento de uma classe para seu código.
 	 */
-	private Map<String, Double> classesToCodigo = new HashMap<>();
+	private Map<String, Integer> classesToCodigo = new HashMap<>();
 	/**
 	 * Contador de classes da base de dados.
 	 */
-	private double contClasses = 0;
+	private int contClasses = 0;
 
 	/**
 	 * Construtor da base de dados.
@@ -86,6 +88,27 @@ public class BaseDeDados {
 	}
 
 	/**
+	 * Demonstra um determinado pré-processamento no documento de exemplo.
+	 * 
+	 * @param preProcessamento
+	 *            pré-processamento a ser demonstrado
+	 */
+	public void demonstrarPreProcessamento(PreProcessamento preProcessamento) {
+		Transformer[] transformers = preProcessamento.getTransformacoes();
+		Dataset<Row> dataset =
+				leBaseDeDados(TipoBaseDeDados.TREINO_HDFS, PreProcessamento.NENHUM, ExtracaoFeatures.SEM_SELECAO);
+		String arquivoNome = "file:" + Configuracao.getInstancia().getReutersBD().getAbsolutePath()
+				+ DOCUMENTO_EXEMPLO_PRE_PROCESSAMENTO;
+		dataset.createOrReplaceTempView("dataset_treino");
+		dataset = dataset.sparkSession()
+				.sql("SELECT * FROM dataset_treino WHERE " + NOME_COL + " = '" + arquivoNome + "'");
+		for (int i = 0; i < transformers.length; i++) {
+			dataset = transformers[i].transform(dataset);
+		}
+		DatasetUtils.printRow(dataset.first(), dataset.schema());
+	}
+
+	/**
 	 * Aplica uma determinada extração de features em uma determinada base de dados.
 	 * 
 	 * @param dataset
@@ -94,61 +117,10 @@ public class BaseDeDados {
 	 *            extração de features a ser realizada
 	 * @return base de dados após aplica a extração de features
 	 */
-	private Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoFeatures extracaoFeatures) {
-		Tokenizer tokenizer = new Tokenizer().setInputCol(CONTEUDO_FINAL_PRE_PROC_COL).setOutputCol(PALAVRAS_COL);
-		Pipeline pipeline = null;
-		int qtdFeatures = extracaoFeatures.getQtdFeatures();
-		switch (extracaoFeatures) {
-		case HASHING_TF:
-			HashingTF hashingTF = new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(FEATURES_COL);
-			if (qtdFeatures > 0) {
-				hashingTF.setNumFeatures(qtdFeatures);
-			}
-			pipeline = new Pipeline().setStages(new PipelineStage[] { tokenizer, hashingTF });
-			break;
-		case HASHING_TF_IDF:
-			HashingTF hashingTF2 =
-					new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(CARACTERISTICAS_TF_COL);
-			if (qtdFeatures > 0) {
-				hashingTF2.setNumFeatures(qtdFeatures);
-			}
-			IDF idf = new IDF().setInputCol(hashingTF2.getOutputCol()).setOutputCol(FEATURES_COL);
-			pipeline = new Pipeline().setStages(new PipelineStage[] { tokenizer, hashingTF2, idf });
-			break;
-		default:
-			throw new RuntimeException("Tipo de extração de features não reconhecido.");
-		}
+	public Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoFeatures extracaoFeatures) {
+		List<PipelineStage> stages = extracaoFeatures.getTransformacoes();
+		Pipeline pipeline = new Pipeline().setStages(stages.toArray(new PipelineStage[0]));
 		return pipeline.fit(dataset).transform(dataset).select(NOME_COL, FEATURES_COL, LABEL_COL, LABEL_STR_COL);
-	}
-
-	/**
-	 * Cria um array com as transformações de uma determinada extração de features.
-	 * 
-	 * @param extracaoFeatures
-	 *            extracaoFeatures a ser utilizada para extrair as features
-	 * @return lista com as transformações necessárias para realizar a extração de
-	 *         features.
-	 */
-	public List<PipelineStage> criarExtracaoFeatures(ExtracaoFeatures extracaoFeatures) {
-		List<PipelineStage> extracaoFeaturesTransf = new ArrayList<>();
-		Tokenizer tokenizer = new Tokenizer().setInputCol(CONTEUDO_FINAL_PRE_PROC_COL).setOutputCol(PALAVRAS_COL);
-		extracaoFeaturesTransf.add(tokenizer);
-		switch (extracaoFeatures) {
-		case HASHING_TF:
-			HashingTF hashingTF = new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(FEATURES_COL);
-			extracaoFeaturesTransf.add(hashingTF);
-			break;
-		case HASHING_TF_IDF:
-			HashingTF hashingTF2 =
-					new HashingTF().setInputCol(tokenizer.getOutputCol()).setOutputCol(CARACTERISTICAS_TF_COL);
-			IDF idf = new IDF().setInputCol(hashingTF2.getOutputCol()).setOutputCol(FEATURES_COL);
-			extracaoFeaturesTransf.add(hashingTF2);
-			extracaoFeaturesTransf.add(idf);
-			break;
-		default:
-			throw new RuntimeException("Tipo de extração de features não reconhecido.");
-		}
-		return extracaoFeaturesTransf;
 	}
 
 	/**
@@ -233,7 +205,7 @@ public class BaseDeDados {
 		Dataset<Row> dataset = configuracao.getSessaoSpark().createDataFrame(new ArrayList<Row>(), esquema);
 		for (File diretorioTema : diretorio.listFiles()) {
 			String classe = diretorioTema.getName();
-			double codigoClasse = classesToCodigo.getOrDefault(classe, -1.0);
+			int codigoClasse = classesToCodigo.getOrDefault(classe, -1);
 			if (codigoClasse == -1) {
 				codigoClasse = contClasses;
 				classesToCodigo.put(classe, contClasses);
@@ -256,13 +228,13 @@ public class BaseDeDados {
 	 * 
 	 * @return esquema original da base de dados
 	 */
-	private StructType criarEsquemaOriginal() {
+	public StructType criarEsquemaOriginal() {
 		StructField[] campos = new StructField[ESQUEMA_STRING.length];
 		for (int i = 0; i < ESQUEMA_STRING.length - 1; i++) {
 			campos[i] = DataTypes.createStructField(ESQUEMA_STRING[i], DataTypes.StringType, true);
 		}
 		campos[ESQUEMA_STRING.length - 1] =
-				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.DoubleType, true);
+				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.IntegerType, true);
 		return DataTypes.createStructType(campos);
 	}
 
@@ -276,40 +248,9 @@ public class BaseDeDados {
 	 * @return dataset após a aplicação do pré-processamento
 	 */
 	public Dataset<Row> aplicarPreProcessamento(Dataset<Row> dataset, PreProcessamento preProcessamento) {
-		Transformer[] preProcessamentos = criarPreProcessamentos(preProcessamento);
+		Transformer[] preProcessamentos = preProcessamento.getTransformacoes();
 		Pipeline pipeline = new Pipeline().setStages(preProcessamentos);
 		return pipeline.fit(dataset).transform(dataset);
-	}
-
-	/**
-	 * Cria um array com as transformações de um determinado pré-processamento.
-	 * 
-	 * @param preProcessamento
-	 *            pré-processamento a ser extraído as transformações
-	 * @return array com as transformações de pré-processamento
-	 */
-	private Transformer[] criarPreProcessamentos(PreProcessamento preProcessamento) {
-		@SuppressWarnings("rawtypes")
-		Class<? extends TransformacaoGenerica>[] classesTransformacao = preProcessamento.getClassesTransformacao();
-		String[] colunasEntrada = preProcessamento.getColunasEntrada();
-		String[] colunasSaida = preProcessamento.getColunasSaida();
-		Transformer[] transformacoes = new Transformer[classesTransformacao.length];
-		StructType esquemaAtual = criarEsquemaOriginal();
-		for (int i = 0; i < classesTransformacao.length; i++) {
-			if (!classesTransformacao[i].getSuperclass().equals(TransformacaoGenerica.class)) {
-				throw new RuntimeException("ERRO! A classe " + classesTransformacao[i].getName()
-						+ " de pré-processamento não é filha de TransformacaoGenerica.");
-			}
-			try {
-				transformacoes[i] = classesTransformacao[i].newInstance().setColunaEntrada(colunasEntrada[i])
-						.setColunaSaida(colunasSaida[i]).setEsquemaAntigo(esquemaAtual);
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new RuntimeException("ERRO! Não foi possível instanciar objeto da classe "
-						+ classesTransformacao[i].getName() + " com o construtor padrão.");
-			}
-			esquemaAtual = transformacoes[i].transformSchema(esquemaAtual);
-		}
-		return transformacoes;
 	}
 
 }

@@ -2,6 +2,15 @@ package org.ufla.spark.rec_inf_tp2.transformacoes;
 
 import org.ufla.spark.rec_inf_tp2.funcoes.FunRemoverTags;
 
+/**
+ * Responsável por aplicar a transformação de uma string de uma determinada
+ * coluna de um dataset em uma string que não contém tags. Aplica transformação
+ * em todo dataset.
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class TransformacaoRemoverTags extends TransformacaoGenerica<FunRemoverTags> {
 
 	private static final long serialVersionUID = 1L;

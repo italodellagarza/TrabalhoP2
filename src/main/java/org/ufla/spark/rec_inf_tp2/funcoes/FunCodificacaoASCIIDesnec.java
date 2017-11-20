@@ -7,6 +7,14 @@ import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 
+/**
+ * Responsável por converter uma string de uma coluna em uma string codificada
+ * em ASCII e sem símbolos desnecessários, apenas com letras.
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 
 	private static final long serialVersionUID = 1L;
@@ -15,10 +23,19 @@ public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 	 * Coluna em que deve aplicar o pré-processamento.
 	 */
 	private int colunaEntrada;
+	/**
+	 * Coluna em que deve salvar string após o pré-processamento.
+	 */
 	private int colunaSaida;
-
+	/**
+	 * Dicionário para conversão de letras com acento em sua respectiva letra sem
+	 * assento.
+	 */
 	private static Map<Character, Character> paraASCII;
 
+	/**
+	 * Inicial o dicionário para remoção de assentos.
+	 */
 	static {
 		paraASCII = new HashMap<>();
 		paraASCII.put('ç', 'c');
@@ -92,15 +109,23 @@ public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 		this.colunaSaida = colunaSaida;
 	}
 
-	@SuppressWarnings("unused")
-	private boolean eDigito(char c) {
-		return c >= '0' && c <= '9';
-	}
-
+	/**
+	 * Verifica se um caracter é uma letra no ASCII.
+	 * 
+	 * @param c
+	 *            caracter a ser verificado.
+	 * @return true, se caracter é letra, caso contrário, false.
+	 */
 	private boolean eLetra(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 	}
 
+	/**
+	 * Aplica a transformação na coluna de entrada da linha e retorna nova linha com
+	 * a transformação salva na coluna de saída. A transformação converte uma string
+	 * para uma string codificada em ASCII e sem símbolos desnecessários, apenas com
+	 * letras
+	 */
 	@Override
 	public Row call(Row row) throws Exception {
 		int n = row.length();

@@ -1,4 +1,5 @@
 package org.ufla.spark.rec_inf_tp2.funcoes;
+
 import java.io.StringReader;
 import java.util.List;
 
@@ -7,6 +8,14 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.ufla.spark.rec_inf_tp2.utils.Stemmer;
 
+/**
+ * Responsável por transformar a string de uma coluna de uma Row em uma nova
+ * string onde as palavras tenham apenas seus radicais (stemmer).
+ * 
+ * @author carlos
+ * @author douglas
+ * @author italo
+ */
 public class FunStemmer implements MapFunction<Row, Row> {
 
 	private static final long serialVersionUID = 1L;
@@ -15,13 +24,20 @@ public class FunStemmer implements MapFunction<Row, Row> {
 	 * Coluna em que deve aplicar o pré-processamento.
 	 */
 	private int colunaEntrada;
-	private int colunaSaida;
+	/**
+	 * Coluna em que deve salvar string após o pré-processamento.
+	 */
+	private int colunaSaida;;
 
 	public FunStemmer(int colunaEntrada, int colunaSaida) {
 		this.colunaEntrada = colunaEntrada;
 		this.colunaSaida = colunaSaida;
 	}
 
+	/**
+	 * Transforma a string de uma coluna de uma Row (colunaEntrada) em uma nova
+	 * string onde as palavras tenham apenas seus radicais (stemmer) (colunaSaida).
+	 */
 	@Override
 	public Row call(Row row) throws Exception {
 		int n = row.length();
