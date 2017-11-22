@@ -26,16 +26,6 @@ public class TransformacaoRemocaoStopWords extends TransformacaoGenerica<FunRemo
 	private Set<String> setStopWords;
 
 	@Override
-	protected String getLabeluid() {
-		return "TransformacaoRemocaoStopWords";
-	}
-
-	@Override
-	public TransformacaoGenerica<FunStemmer> criarTransformacao() {
-		return new TransformacaoStemmer();
-	}
-
-	@Override
 	public FunRemocaoStopWords criarFuncao(int indiceColEntrada, int indiceColSaida) {
 		if (setStopWords == null) {
 			try {
@@ -45,6 +35,16 @@ public class TransformacaoRemocaoStopWords extends TransformacaoGenerica<FunRemo
 			}
 		}
 		return new FunRemocaoStopWords(indiceColEntrada, indiceColSaida, setStopWords);
+	}
+
+	@Override
+	public TransformacaoGenerica<FunStemmer> criarTransformacao() {
+		return new TransformacaoStemmer();
+	}
+
+	@Override
+	protected String getLabeluid() {
+		return "TransformacaoRemocaoStopWords";
 	}
 
 }

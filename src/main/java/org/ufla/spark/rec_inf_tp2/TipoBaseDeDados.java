@@ -38,17 +38,6 @@ enum TipoBaseDeDados {
 	}
 
 	/**
-	 * Recupera o nome do diretório onde este tipo da base de dados Reuters 21578
-	 * está salvo.
-	 * 
-	 * @return nome do diretório onde este tipo da base de dados Reuters 21578 está
-	 *         salvo
-	 */
-	public String getNomeDiretorioBD() {
-		return nomeDiretorioBD;
-	}
-
-	/**
 	 * Verifica se esse tipo de base de dados é original, as base de dados originais
 	 * são TREINO e TESTE.
 	 * 
@@ -66,12 +55,23 @@ enum TipoBaseDeDados {
 	}
 
 	/**
+	 * Recupera o nome do diretório onde este tipo da base de dados Reuters 21578
+	 * está salvo.
+	 * 
+	 * @return nome do diretório onde este tipo da base de dados Reuters 21578 está
+	 *         salvo
+	 */
+	public String getNomeDiretorioBD() {
+		return nomeDiretorioBD;
+	}
+
+	/**
 	 * Transforma uma base de dados original (TREINO e TESTE) em json HDFS
 	 * (TREINO_JSON_HDFS, TESTE_JSON_HDFS).
 	 * 
 	 * @return retorna a base de dados em json HDFS
 	 */
-	public TipoBaseDeDados paraJsonHDFS() {
+	public TipoBaseDeDados paraHDFS() {
 		switch (this) {
 		case TREINO:
 			return TREINO_HDFS;

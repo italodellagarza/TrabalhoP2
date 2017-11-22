@@ -16,8 +16,8 @@ public class TransformacaoCodificacaoASCIIDesnec extends TransformacaoGenerica<F
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected String getLabeluid() {
-		return "TransformacaoCodificacaoASCIIDesnec";
+	public FunCodificacaoASCIIDesnec criarFuncao(int indiceColEntrada, int indiceColSaida) {
+		return new FunCodificacaoASCIIDesnec(indiceColEntrada, indiceColSaida);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ public class TransformacaoCodificacaoASCIIDesnec extends TransformacaoGenerica<F
 	}
 
 	@Override
-	public FunCodificacaoASCIIDesnec criarFuncao(int indiceColEntrada, int indiceColSaida) {
-		return new FunCodificacaoASCIIDesnec(indiceColEntrada, indiceColSaida);
+	protected String getLabeluid() {
+		return "TransformacaoCodificacaoASCIIDesnec";
 	}
 
 }

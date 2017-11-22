@@ -1,15 +1,20 @@
 package org.ufla.spark.rec_inf_tp2;
 
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_COL;
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_FINAL_PRE_PROC_COL;
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_MINUSCULO_COL;
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_MINUSCULO_TAGS_ASCII_COL;
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_MINUSCULO_TAGS_COL;
+import static org.ufla.spark.rec_inf_tp2.BaseDeDados.CONTEUDO_SEM_STOP_WORDS_COL;
+
 import org.apache.spark.ml.Transformer;
 import org.apache.spark.sql.types.StructType;
+import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoCodificacaoASCIIDesnec;
 import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoGenerica;
 import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoMinuscula;
-import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoRemoverTags;
-import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoCodificacaoASCIIDesnec;
 import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoRemocaoStopWords;
+import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoRemoverTags;
 import org.ufla.spark.rec_inf_tp2.transformacoes.TransformacaoStemmer;
-
-import static org.ufla.spark.rec_inf_tp2.BaseDeDados.*;
 
 /**
  * Enumeração dos tipos de pré-processamento que podem ser realizados nos dados.
@@ -56,26 +61,6 @@ enum PreProcessamento {
 	}
 
 	/**
-	 * Recupera o nome do diretório onde este tipo da base de dados Reuters 21578
-	 * está salvo.
-	 * 
-	 * @return nome do diretório onde este tipo da base de dados Reuters 21578 está
-	 *         salvo
-	 */
-	public String getSufixoDiretorioBD() {
-		return sufixoDiretorioBD;
-	}
-
-	/**
-	 * Recupera o array com as transformações de pré-processamento.
-	 * 
-	 * @return array com as transformações de pré-processamento
-	 */
-	public Transformer[] getTransformacoes() {
-		return transformacoes;
-	}
-
-	/**
 	 * Cria o array com as transformações de um determinado pré-processamento.
 	 * 
 	 * @param classesTransformacao
@@ -111,6 +96,26 @@ enum PreProcessamento {
 			}
 			esquemaAtual = transformacoes[i].transformSchema(esquemaAtual);
 		}
+	}
+
+	/**
+	 * Recupera o nome do diretório onde este tipo da base de dados Reuters 21578
+	 * está salvo.
+	 * 
+	 * @return nome do diretório onde este tipo da base de dados Reuters 21578 está
+	 *         salvo
+	 */
+	public String getSufixoDiretorioBD() {
+		return sufixoDiretorioBD;
+	}
+
+	/**
+	 * Recupera o array com as transformações de pré-processamento.
+	 * 
+	 * @return array com as transformações de pré-processamento
+	 */
+	public Transformer[] getTransformacoes() {
+		return transformacoes;
 	}
 
 	/**

@@ -16,8 +16,8 @@ public class TransformacaoMinuscula extends TransformacaoGenerica<FunMapMinuscul
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected String getLabeluid() {
-		return "TransformacaoMinuscula";
+	public FunMapMinuscula criarFuncao(int indiceColEntrada, int indiceColSaida) {
+		return new FunMapMinuscula(indiceColEntrada, indiceColSaida);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ public class TransformacaoMinuscula extends TransformacaoGenerica<FunMapMinuscul
 	}
 
 	@Override
-	public FunMapMinuscula criarFuncao(int indiceColEntrada, int indiceColSaida) {
-		return new FunMapMinuscula(indiceColEntrada, indiceColSaida);
+	protected String getLabeluid() {
+		return "TransformacaoMinuscula";
 	}
 
 }

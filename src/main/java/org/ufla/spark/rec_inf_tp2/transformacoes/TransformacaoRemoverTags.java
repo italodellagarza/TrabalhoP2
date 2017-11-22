@@ -16,8 +16,8 @@ public class TransformacaoRemoverTags extends TransformacaoGenerica<FunRemoverTa
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected String getLabeluid() {
-		return "TransformacaoRemoverTags";
+	public FunRemoverTags criarFuncao(int indiceColEntrada, int indiceColSaida) {
+		return new FunRemoverTags(indiceColEntrada, indiceColSaida);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ public class TransformacaoRemoverTags extends TransformacaoGenerica<FunRemoverTa
 	}
 
 	@Override
-	public FunRemoverTags criarFuncao(int indiceColEntrada, int indiceColSaida) {
-		return new FunRemoverTags(indiceColEntrada, indiceColSaida);
+	protected String getLabeluid() {
+		return "TransformacaoRemoverTags";
 	}
 
 }

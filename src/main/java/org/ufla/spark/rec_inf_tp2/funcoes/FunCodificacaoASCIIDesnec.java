@@ -20,19 +20,10 @@ public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Coluna em que deve aplicar o pré-processamento.
-	 */
-	private int colunaEntrada;
-	/**
-	 * Coluna em que deve salvar string após o pré-processamento.
-	 */
-	private int colunaSaida;
-	/**
 	 * Dicionário para conversão de letras com acento em sua respectiva letra sem
 	 * assento.
 	 */
 	private static Map<Character, Character> paraASCII;
-
 	/**
 	 * Inicial o dicionário para remoção de assentos.
 	 */
@@ -103,21 +94,19 @@ public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 		paraASCII.put('ḧ', 'h');
 		paraASCII.put('ẍ', 'x');
 	}
+	/**
+	 * Coluna em que deve aplicar o pré-processamento.
+	 */
+	private int colunaEntrada;
+
+	/**
+	 * Coluna em que deve salvar string após o pré-processamento.
+	 */
+	private int colunaSaida;
 
 	public FunCodificacaoASCIIDesnec(int colunaEntrada, int colunaSaida) {
 		this.colunaEntrada = colunaEntrada;
 		this.colunaSaida = colunaSaida;
-	}
-
-	/**
-	 * Verifica se um caracter é uma letra no ASCII.
-	 * 
-	 * @param c
-	 *            caracter a ser verificado.
-	 * @return true, se caracter é letra, caso contrário, false.
-	 */
-	private boolean eLetra(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 	}
 
 	/**
@@ -164,6 +153,17 @@ public class FunCodificacaoASCIIDesnec implements MapFunction<Row, Row> {
 		}
 		campos[colunaSaida] = saida.toString();
 		return RowFactory.create(campos);
+	}
+
+	/**
+	 * Verifica se um caracter é uma letra no ASCII.
+	 * 
+	 * @param c
+	 *            caracter a ser verificado.
+	 * @return true, se caracter é letra, caso contrário, false.
+	 */
+	private boolean eLetra(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 	}
 
 }

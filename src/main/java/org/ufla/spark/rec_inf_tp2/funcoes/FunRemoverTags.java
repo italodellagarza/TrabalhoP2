@@ -1,4 +1,5 @@
 package org.ufla.spark.rec_inf_tp2.funcoes;
+
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;

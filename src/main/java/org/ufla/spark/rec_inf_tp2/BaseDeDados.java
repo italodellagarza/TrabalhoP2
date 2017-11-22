@@ -11,6 +11,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.Transformer;
+import org.apache.spark.ml.feature.HashingTF;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
@@ -59,9 +60,21 @@ public class BaseDeDados {
 			File.separator + "training" + File.separator + "acq" + File.separator + "0000005";
 
 	/**
+	 * Retorna a única instância de BaseDeDados da aplicação.
+	 * 
+	 * @return única instância de BaseDeDados da aplicação.
+	 */
+	public static BaseDeDados getInstancia() {
+		if (baseDeDados == null) {
+			baseDeDados = new BaseDeDados();
+		}
+		return baseDeDados;
+	}
+	/**
 	 * Mapeamento de uma classe para seu código.
 	 */
 	private Map<String, Integer> classesToCodigo = new HashMap<>();
+
 	/**
 	 * Contador de classes da base de dados.
 	 */
@@ -76,15 +89,49 @@ public class BaseDeDados {
 	}
 
 	/**
-	 * Retorna a única instância de BaseDeDados da aplicação.
+	 * Aplica uma determinada extração de features em uma determinada base de dados.
 	 * 
-	 * @return única instância de BaseDeDados da aplicação.
+	 * @param dataset
+	 *            base de dados em que a extração de features será realizada
+	 * @param extracaoFeatures
+	 *            extração de features a ser realizada
+	 * @return base de dados após aplica a extração de features
 	 */
-	public static BaseDeDados getInstancia() {
-		if (baseDeDados == null) {
-			baseDeDados = new BaseDeDados();
+	public Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoFeatures extracaoFeatures) {
+		List<PipelineStage> stages = extracaoFeatures.getTransformacoes();
+		System.out.println("\nNUM_FEATURES -> " + ((HashingTF) stages.get(1)).getNumFeatures() + "\n");
+		Pipeline pipeline = new Pipeline().setStages(stages.toArray(new PipelineStage[0]));
+		return pipeline.fit(dataset).transform(dataset).select(NOME_COL, FEATURES_COL, LABEL_COL, LABEL_STR_COL);
+	}
+
+	/**
+	 * Aplica um determinado pré-processamento em um determinado dataset.
+	 * 
+	 * @param dataset
+	 *            dataset a ser aplicado o pré-processamento
+	 * @param preProcessamento
+	 *            pré-processamento a ser aplicado no dataset
+	 * @return dataset após a aplicação do pré-processamento
+	 */
+	public Dataset<Row> aplicarPreProcessamento(Dataset<Row> dataset, PreProcessamento preProcessamento) {
+		Transformer[] preProcessamentos = preProcessamento.getTransformacoes();
+		Pipeline pipeline = new Pipeline().setStages(preProcessamentos);
+		return pipeline.fit(dataset).transform(dataset);
+	}
+
+	/**
+	 * Cria o esquema original da base de dados.
+	 * 
+	 * @return esquema original da base de dados
+	 */
+	public StructType criarEsquemaOriginal() {
+		StructField[] campos = new StructField[ESQUEMA_STRING.length];
+		for (int i = 0; i < ESQUEMA_STRING.length - 1; i++) {
+			campos[i] = DataTypes.createStructField(ESQUEMA_STRING[i], DataTypes.StringType, true);
 		}
-		return baseDeDados;
+		campos[ESQUEMA_STRING.length - 1] =
+				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.IntegerType, true);
+		return DataTypes.createStructType(campos);
 	}
 
 	/**
@@ -109,21 +156,6 @@ public class BaseDeDados {
 	}
 
 	/**
-	 * Aplica uma determinada extração de features em uma determinada base de dados.
-	 * 
-	 * @param dataset
-	 *            base de dados em que a extração de features será realizada
-	 * @param extracaoFeatures
-	 *            extração de features a ser realizada
-	 * @return base de dados após aplica a extração de features
-	 */
-	public Dataset<Row> aplicarExtracaoDeFeatures(Dataset<Row> dataset, ExtracaoFeatures extracaoFeatures) {
-		List<PipelineStage> stages = extracaoFeatures.getTransformacoes();
-		Pipeline pipeline = new Pipeline().setStages(stages.toArray(new PipelineStage[0]));
-		return pipeline.fit(dataset).transform(dataset).select(NOME_COL, FEATURES_COL, LABEL_COL, LABEL_STR_COL);
-	}
-
-	/**
 	 * Realiza a leitura de um determinado tipo de base de dados com um determinado
 	 * tipo de pré-processamento.
 	 * 
@@ -138,7 +170,7 @@ public class BaseDeDados {
 			ExtracaoFeatures extracaoDeFeatures) {
 		if (tipoBaseDeDados.eOriginal() && (!PreProcessamento.NENHUM.equals(preProcessamento)
 				|| !ExtracaoFeatures.SEM_SELECAO.equals(extracaoDeFeatures))) {
-			tipoBaseDeDados = tipoBaseDeDados.paraJsonHDFS();
+			tipoBaseDeDados = tipoBaseDeDados.paraHDFS();
 		}
 		Configuracao configuracao = Configuracao.getInstancia();
 		File diretorio = configuracao.diretorioBD(tipoBaseDeDados, preProcessamento, extracaoDeFeatures);
@@ -221,36 +253,6 @@ public class BaseDeDados {
 			dataset = dataset.union(temaDataset);
 		}
 		return dataset;
-	}
-
-	/**
-	 * Cria o esquema original da base de dados.
-	 * 
-	 * @return esquema original da base de dados
-	 */
-	public StructType criarEsquemaOriginal() {
-		StructField[] campos = new StructField[ESQUEMA_STRING.length];
-		for (int i = 0; i < ESQUEMA_STRING.length - 1; i++) {
-			campos[i] = DataTypes.createStructField(ESQUEMA_STRING[i], DataTypes.StringType, true);
-		}
-		campos[ESQUEMA_STRING.length - 1] =
-				DataTypes.createStructField(ESQUEMA_STRING[ESQUEMA_STRING.length - 1], DataTypes.IntegerType, true);
-		return DataTypes.createStructType(campos);
-	}
-
-	/**
-	 * Aplica um determinado pré-processamento em um determinado dataset.
-	 * 
-	 * @param dataset
-	 *            dataset a ser aplicado o pré-processamento
-	 * @param preProcessamento
-	 *            pré-processamento a ser aplicado no dataset
-	 * @return dataset após a aplicação do pré-processamento
-	 */
-	public Dataset<Row> aplicarPreProcessamento(Dataset<Row> dataset, PreProcessamento preProcessamento) {
-		Transformer[] preProcessamentos = preProcessamento.getTransformacoes();
-		Pipeline pipeline = new Pipeline().setStages(preProcessamentos);
-		return pipeline.fit(dataset).transform(dataset);
 	}
 
 }

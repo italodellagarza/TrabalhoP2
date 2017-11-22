@@ -16,8 +16,8 @@ public class TransformacaoStemmer extends TransformacaoGenerica<FunStemmer> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected String getLabeluid() {
-		return "TransformacaoStemmer";
+	public FunStemmer criarFuncao(int colunaEntrada, int indiceColSaida) {
+		return new FunStemmer(colunaEntrada, indiceColSaida);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ public class TransformacaoStemmer extends TransformacaoGenerica<FunStemmer> {
 	}
 
 	@Override
-	public FunStemmer criarFuncao(int colunaEntrada, int indiceColSaida) {
-		return new FunStemmer(colunaEntrada, indiceColSaida);
+	protected String getLabeluid() {
+		return "TransformacaoStemmer";
 	}
 
 }

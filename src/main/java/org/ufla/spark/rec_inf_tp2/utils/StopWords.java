@@ -28,6 +28,16 @@ public class StopWords {
 	private BufferedReader in;
 
 	/**
+	 * Recupera um conjunto com as stopwords.
+	 * 
+	 * @return conjunto com as stopwords.
+	 * @throws IOException
+	 */
+	public Set<String> getSetStopWords() throws IOException {
+		return new HashSet<>(Arrays.asList(getStopWords()));
+	}
+
+	/**
 	 * Recupera um array com as stopwords.
 	 * 
 	 * @return array com as stopwords
@@ -49,15 +59,5 @@ public class StopWords {
 		}
 		in.close();
 		return stopWords.toArray(new String[0]);
-	}
-
-	/**
-	 * Recupera um conjunto com as stopwords.
-	 * 
-	 * @return conjunto com as stopwords.
-	 * @throws IOException
-	 */
-	public Set<String> getSetStopWords() throws IOException {
-		return new HashSet<>(Arrays.asList(getStopWords()));
 	}
 }

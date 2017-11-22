@@ -24,6 +24,10 @@ public abstract class TransformacaoGenerica<F extends MapFunction<Row, Row>> ext
 
 	private static final long serialVersionUID = 1L;
 	/**
+	 * Um contador de transformações instânciadas.
+	 */
+	private static int n = 0;
+	/**
 	 * Nome da coluna de entrada da transformação.
 	 */
 	private String colunaEntrada;
@@ -39,51 +43,16 @@ public abstract class TransformacaoGenerica<F extends MapFunction<Row, Row>> ext
 	 * Esquema do dataset após a trasformação.
 	 */
 	protected StructType novoSaida;
+
 	/**
 	 * String representando uma instância da transformação.
 	 */
 	private String uid;
 
-	/**
-	 * Um contador de transformações instânciadas.
-	 */
-	private static int n = 0;
-
-	/**
-	 * Recupera o nome da transformação.
-	 * 
-	 * @return nome da transformação
-	 */
-	protected abstract String getLabeluid();
-
-	@Override
-	public String uid() {
-		return uid;
-	}
-
 	public TransformacaoGenerica() {
 		uid = getLabeluid() + "_" + this.hashCode() + "_" + n;
 		n++;
 	}
-
-	/**
-	 * Cria uma instância da transformação.
-	 * 
-	 * @return uma instância da transformação
-	 */
-	public abstract TransformacaoGenerica<?> criarTransformacao();
-
-	/**
-	 * Cria uma instância da função que aplica a transformação nas linhas do
-	 * dataset.
-	 * 
-	 * @param indiceColEntrada
-	 *            índice da coluna de entrada da transformação
-	 * @param indiceColSaida
-	 *            índice da coluna de saída da transformação
-	 * @return instância da função que aplica a transformação nas linhas do dataset
-	 */
-	public abstract F criarFuncao(int indiceColEntrada, int indiceColSaida);
 
 	@Override
 	public Transformer copy(ParamMap arg0) {
@@ -91,24 +60,6 @@ public abstract class TransformacaoGenerica<F extends MapFunction<Row, Row>> ext
 				.setColunaSaida(colunaSaida).setEsquemaEntrada(esquemaEntrada);
 		copia.novoSaida = novoSaida;
 		return copia;
-	}
-
-	/**
-	 * Verifica se os índices da coluna de entrada e saída são válidos para um
-	 * esquema com uma determinada quantidade de colunas.
-	 * 
-	 * @param qtdColunas
-	 *            quantidade de colunas do esquema
-	 * @param indiceColEntrada
-	 *            índice da coluna de entrada da transformação
-	 * @param indiceColSaida
-	 *            índice da coluna de saída da transformação
-	 * @return true, se os índices da coluna de entrada e saída são válidos para o
-	 *         esquema, caso contrário, false
-	 */
-	public boolean eValido(int qtdColunas, int indiceColEntrada, int indiceColSaida) {
-		return indiceColEntrada >= 0 && indiceColEntrada < qtdColunas && indiceColSaida >= 0
-				&& indiceColSaida <= qtdColunas;
 	}
 
 	/**
@@ -139,6 +90,114 @@ public abstract class TransformacaoGenerica<F extends MapFunction<Row, Row>> ext
 	}
 
 	/**
+	 * Cria uma instância da função que aplica a transformação nas linhas do
+	 * dataset.
+	 * 
+	 * @param indiceColEntrada
+	 *            índice da coluna de entrada da transformação
+	 * @param indiceColSaida
+	 *            índice da coluna de saída da transformação
+	 * @return instância da função que aplica a transformação nas linhas do dataset
+	 */
+	public abstract F criarFuncao(int indiceColEntrada, int indiceColSaida);
+
+	/**
+	 * Cria uma instância da transformação.
+	 * 
+	 * @return uma instância da transformação
+	 */
+	public abstract TransformacaoGenerica<?> criarTransformacao();
+
+	/**
+	 * Verifica se os índices da coluna de entrada e saída são válidos para um
+	 * esquema com uma determinada quantidade de colunas.
+	 * 
+	 * @param qtdColunas
+	 *            quantidade de colunas do esquema
+	 * @param indiceColEntrada
+	 *            índice da coluna de entrada da transformação
+	 * @param indiceColSaida
+	 *            índice da coluna de saída da transformação
+	 * @return true, se os índices da coluna de entrada e saída são válidos para o
+	 *         esquema, caso contrário, false
+	 */
+	public boolean eValido(int qtdColunas, int indiceColEntrada, int indiceColSaida) {
+		return indiceColEntrada >= 0 && indiceColEntrada < qtdColunas && indiceColSaida >= 0
+				&& indiceColSaida <= qtdColunas;
+	}
+
+	/**
+	 * Recupera o nome da coluna de entrada da transformação.
+	 * 
+	 * @return o nome da coluna de entrada da transformação.
+	 */
+	public String getColunaEntrada() {
+		return colunaEntrada;
+	}
+
+	/**
+	 * Recupera o nome da coluna de saída da transformação.
+	 * 
+	 * @return o nome da coluna de saída da transformação.
+	 */
+	public String getColunaSaida() {
+		return colunaSaida;
+	}
+
+	/**
+	 * Recupera o esquema de entrada do dataset que será aplicada a transformação.
+	 * 
+	 * @return esquema de entrada do dataset que será aplicada a transformação.
+	 */
+	public StructType getEsquemaEntrada() {
+		return esquemaEntrada;
+	}
+
+	/**
+	 * Recupera o nome da transformação.
+	 * 
+	 * @return nome da transformação
+	 */
+	protected abstract String getLabeluid();
+
+	/**
+	 * Define o nome da coluna de entrada da transformação.
+	 * 
+	 * @param colunaEntrada
+	 *            nome da coluna de entrada da transformação.
+	 * @return a própria transformação, após definir o nome da coluna de entrada
+	 */
+	public TransformacaoGenerica<?> setColunaEntrada(String colunaEntrada) {
+		this.colunaEntrada = colunaEntrada;
+		return this;
+	}
+
+	/**
+	 * Define o nome da coluna de saída da transformação.
+	 * 
+	 * @param colunaSaida
+	 *            nome da coluna de saída da transformação.
+	 * @return a própria transformação, após definir o nome da coluna de saída
+	 */
+	public TransformacaoGenerica<?> setColunaSaida(String colunaSaida) {
+		this.colunaSaida = colunaSaida;
+		return this;
+	}
+
+	/**
+	 * Define o esquema de entrada do dataset que será aplicada a transformação.
+	 * 
+	 * @param esquemaEntrada
+	 *            esquema de entrada do dataset que será aplicada a transformação.
+	 * @return a própria transformação, após definir o esquema de entrada do dataset
+	 *         que será aplicada a transformação.
+	 */
+	public TransformacaoGenerica<?> setEsquemaEntrada(StructType esquemaEntrada) {
+		this.esquemaEntrada = esquemaEntrada;
+		return this;
+	}
+
+	/**
 	 * Aplica a transformação no dataset e retorna o dataset transformado.
 	 */
 	@SuppressWarnings("unchecked")
@@ -165,67 +224,8 @@ public abstract class TransformacaoGenerica<F extends MapFunction<Row, Row>> ext
 		return novoSaida;
 	}
 
-	/**
-	 * Recupera o nome da coluna de entrada da transformação.
-	 * 
-	 * @return o nome da coluna de entrada da transformação.
-	 */
-	public String getColunaEntrada() {
-		return colunaEntrada;
-	}
-
-	/**
-	 * Define o nome da coluna de entrada da transformação.
-	 * 
-	 * @param colunaEntrada
-	 *            nome da coluna de entrada da transformação.
-	 * @return a própria transformação, após definir o nome da coluna de entrada
-	 */
-	public TransformacaoGenerica<?> setColunaEntrada(String colunaEntrada) {
-		this.colunaEntrada = colunaEntrada;
-		return this;
-	}
-
-	/**
-	 * Recupera o nome da coluna de saída da transformação.
-	 * 
-	 * @return o nome da coluna de saída da transformação.
-	 */
-	public String getColunaSaida() {
-		return colunaSaida;
-	}
-
-	/**
-	 * Define o nome da coluna de saída da transformação.
-	 * 
-	 * @param colunaSaida
-	 *            nome da coluna de saída da transformação.
-	 * @return a própria transformação, após definir o nome da coluna de saída
-	 */
-	public TransformacaoGenerica<?> setColunaSaida(String colunaSaida) {
-		this.colunaSaida = colunaSaida;
-		return this;
-	}
-
-	/**
-	 * Recupera o esquema de entrada do dataset que será aplicada a transformação.
-	 * 
-	 * @return esquema de entrada do dataset que será aplicada a transformação.
-	 */
-	public StructType getEsquemaEntrada() {
-		return esquemaEntrada;
-	}
-
-	/**
-	 * Define o esquema de entrada do dataset que será aplicada a transformação.
-	 * 
-	 * @param esquemaEntrada
-	 *            esquema de entrada do dataset que será aplicada a transformação.
-	 * @return a própria transformação, após definir o esquema de entrada do dataset
-	 *         que será aplicada a transformação.
-	 */
-	public TransformacaoGenerica<?> setEsquemaEntrada(StructType esquemaEntrada) {
-		this.esquemaEntrada = esquemaEntrada;
-		return this;
+	@Override
+	public String uid() {
+		return uid;
 	}
 }

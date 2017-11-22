@@ -1,8 +1,8 @@
 package org.ufla.spark.rec_inf_tp2.funcoes;
 
 import org.apache.spark.api.java.function.MapFunction;
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.DenseVector;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.sql.Row;
 

@@ -29,10 +29,21 @@ public class Configuracao {
 	 */
 	private static Configuracao configuracao;
 	/**
+	 * Retorna a única instância de Configuração da aplicação.
+	 * 
+	 * @return única instância de Configuração da aplicação.
+	 */
+	public static Configuracao getInstancia() {
+		if (configuracao == null) {
+			configuracao = new Configuracao(REUTERS_BD);
+		}
+		return configuracao;
+	}
+
+	/**
 	 * Diretório raiz da base de dados Reuters 21578.
 	 */
 	private File reutersBD;
-
 	/**
 	 * Configuração da aplicação Spark.
 	 */
@@ -41,6 +52,7 @@ public class Configuracao {
 	 * Contexto da aplicação Spark.
 	 */
 	private JavaSparkContext contextoSpark;
+
 	/**
 	 * Sessão da aplicação Spark.
 	 */
@@ -57,37 +69,6 @@ public class Configuracao {
 		this.configuracaoSpark = new SparkConf().setMaster("local[*]").setAppName(NOME_APP);
 		this.contextoSpark = new JavaSparkContext(configuracaoSpark);
 		this.sessaoSpark = SparkSession.builder().config(configuracaoSpark).getOrCreate();
-		this.reutersBD = new File(reutersBD);
-	}
-
-	/**
-	 * Retorna a única instância de Configuração da aplicação.
-	 * 
-	 * @return única instância de Configuração da aplicação.
-	 */
-	public static Configuracao getInstancia() {
-		if (configuracao == null) {
-			configuracao = new Configuracao(REUTERS_BD);
-		}
-		return configuracao;
-	}
-
-	/**
-	 * Recupera o diretório raiz da base de dados Reuters 21578.
-	 * 
-	 * @return diretório raiz da base de dados Reuters 21578
-	 */
-	public File getReutersBD() {
-		return reutersBD;
-	}
-
-	/**
-	 * Define o endereço da base de dados Reuters 21578.
-	 * 
-	 * @param reutersBD
-	 *            endereço da base de dados Reuters 21578
-	 */
-	public void setReutersBD(String reutersBD) {
 		this.reutersBD = new File(reutersBD);
 	}
 
@@ -128,12 +109,31 @@ public class Configuracao {
 	}
 
 	/**
+	 * Recupera o diretório raiz da base de dados Reuters 21578.
+	 * 
+	 * @return diretório raiz da base de dados Reuters 21578
+	 */
+	public File getReutersBD() {
+		return reutersBD;
+	}
+
+	/**
 	 * Recupera a sessão da aplicação Spark.
 	 * 
 	 * @return sessão da aplicação Spark
 	 */
 	public SparkSession getSessaoSpark() {
 		return sessaoSpark;
+	}
+
+	/**
+	 * Define o endereço da base de dados Reuters 21578.
+	 * 
+	 * @param reutersBD
+	 *            endereço da base de dados Reuters 21578
+	 */
+	public void setReutersBD(String reutersBD) {
+		this.reutersBD = new File(reutersBD);
 	}
 
 }
