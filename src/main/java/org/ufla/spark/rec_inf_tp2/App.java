@@ -87,11 +87,40 @@ public class App {
 	 * grid.
 	 */
 	private static String modeloGridSearch = "modeloFinalGridSearch";
+	/**
+	 * Só serão executados os modelos com identificadores iguais ou maiores do que
+	 * está variável.
+	 */
+	private static int limiteInferiorModelo = 0;
+	/**
+	 * Só serão executados os modelos com identificadores menores do que está
+	 * variável.
+	 */
+	private static int limiteSuperiorModelo = 243;
 
 	public static void main(String[] args) throws IOException {
 		Logger.getRootLogger().setLevel(Level.ERROR);
-		//testeModeloNaiveBayes();
+		defineArgumentos(args);
+		// testeModeloNaiveBayes();
+		System.out.println("Limite inferior dos modelos gerados " + limiteInferiorModelo);
+		System.out.println("Limite superior dos modelos gerados " + limiteSuperiorModelo);
+		System.out.println("----------------------------------------------------------");
 		testeModeloCombinandoParametros();
+	}
+
+	/**
+	 * Define os argumentos da aplicação.
+	 * 
+	 * @param args
+	 *            argumentos da aplicação
+	 */
+	private static void defineArgumentos(String[] args) {
+		if (args.length > 0) {
+			limiteInferiorModelo = Integer.parseInt(args[0]);
+		}
+		if (args.length > 1) {
+			limiteSuperiorModelo = Integer.parseInt(args[1]);
+		}
 	}
 
 	/**
@@ -196,7 +225,7 @@ public class App {
 
 			modeloCV = cv.fit(datasetTreino);
 			modeloCV.save(nomeDoModelo);
-			//bestModel = (OneVsRestModel) modeloCV.bestModel();
+			// bestModel = (OneVsRestModel) modeloCV.bestModel();
 		}
 
 		Dataset<Row> predicoes;
@@ -208,7 +237,6 @@ public class App {
 			predicoes.write().save(predicoesNome);
 		}
 
-		
 		Dataset<Tuple2<Object, Object>> predicoesTuple2 = paraTuple2(predicoes, "prediction", "label");
 
 		// Get evaluation metrics.
@@ -235,7 +263,6 @@ public class App {
 		System.out.format("Weighted false positive rate = %f\n", metrics.weightedFalsePositiveRate());
 		System.out.format("Weighted true positive rate = %f\n", metrics.weightedTruePositiveRate());
 
-
 		System.out
 				.println("\n\nMétricas calculadas org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator\n");
 		MulticlassClassificationEvaluator mEvaluator = new MulticlassClassificationEvaluator();
@@ -249,7 +276,6 @@ public class App {
 
 		System.out.println(
 				"\nmedia das métricas F1 para cross validator em treino -> " + Arrays.toString(modeloCV.avgMetrics()));
-
 
 	}
 
@@ -308,9 +334,13 @@ public class App {
 			combinacaoParametros.reset();
 			while (combinacaoParametros.temProximo()) {
 				Parametros parametros = combinacaoParametros.proximo();
-				if (contModels < 19) {
+				if (contModels < limiteInferiorModelo) {
 					contModels++;
 					continue;
+				}
+				if (contModels == limiteSuperiorModelo) {
+					bwLog.close();
+					return;
 				}
 				System.out.println("\nCRIANDO MODELO " + contModels + "\n");
 				System.out.printf("numFeatures: %d\n", nFeatures);
